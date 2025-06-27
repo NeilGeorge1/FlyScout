@@ -98,38 +98,63 @@ search_btn.click()
 closePopups(driver)
 
 try:
-    flights = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterBody-OW']")
+    flights = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterItem']")
+    
     if not flights:
         print("No flights found")
-    
+
     for flight in flights:
         airline = flight.find_element(By.XPATH, ".//p[@data-test='component-airlineHeading']").text
-        flight_codes = flight.find_element(By.CLASS_NAME, "fliCode").text
+        flight_code = flight.find_element(By.CLASS_NAME, "fliCode").text
 
-        dep_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//span").text
-        dep_loc = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//font").text
+        departure_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//span").text
+        departure_city = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//font").text
 
-        arr_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span").text
-        arr_loc = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//font").text
+        arrival_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[1]").text
+        try:
+            arrival_day = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[contains(text(),'+')]").text
+        except:
+            arrival_day = ""
+        arrival_info = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//font").text
 
         duration = flight.find_element(By.XPATH, ".//div[contains(@class, 'stop-info')]//p[1]").text
         stops = flight.find_element(By.XPATH, ".//p[contains(@class,'flightsLayoverInfo')]").text
 
         price = flight.find_element(By.XPATH, ".//div[contains(@class,'clusterViewPrice')]//span").text
 
-        print("Cheapest flights from Goibibo:")
-        print(f"Site: {url}") 
+        try:
+            lock_price = flight.find_element(By.XPATH, ".//span[@data-test='component-lockPricePersuasionText']").text
+        except:
+            lock_price = "N/A"
+
+        try:
+            discount_info = flight.find_element(By.XPATH, ".//p[contains(@class,'alertMsg')]").text
+        except:
+            discount_info = "N/A"
+
+        try:
+            refund_policy = flight.find_element(By.XPATH, ".//span[contains(@class,'ftr-persuasion')]").text
+        except:
+            refund_policy = "N/A"
+
+        # Print Output
+        print("Cheapest Rates from Goibibo:")
         print("Airline:", airline)
-        print("Flight Code(s):", flight_codes)
-        print("Departure:", dep_time, "-", dep_loc)
-        print("Arrival:", arr_time, "-", arr_loc)
+        print("Flight Code(s):", flight_code)
+        print("Departure:", f"{departure_time} — {departure_city}")
+        print("Arrival:", f"{arrival_time} {arrival_day} — {arrival_info}")
         print("Duration:", duration)
         print("Stops:", stops)
         print("Price:", price)
-        print("="*50)
-        break  # Only print the first (cheapest) flight
+        print("Lock Price Info:", lock_price)
+        print("Discount Offers:", discount_info)
+        print("Refund Policy:", refund_policy)
+        print("="*60)
+        break  # Only the first flight (cheapest)
+        
 except Exception as e:
-    print("Flights not found")
+    print("Flights not found due to:", e)
+
 
 time.sleep(1)
 driver.quit()

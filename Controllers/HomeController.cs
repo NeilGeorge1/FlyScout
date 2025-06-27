@@ -22,7 +22,7 @@ public class HomeController : Controller
     public IActionResult RunScripts(string from, string to, DateTime date)
     {
         string formattedDate = date.ToString("ddd MMM dd yyyy");
-        List<string> paths = new List<string> { "Scrapers/goibibo.py"};
+        List<string> paths = new List<string> { "Scrapers/goibibo.py", "Scrapers/make_my_trip.py"};
 
         List<string> allOutputs = new List<string>();
 

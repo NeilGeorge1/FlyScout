@@ -1,29 +1,60 @@
 @model string
 @{
     ViewData["Title"] = "Flight Results";
+    var flights = Model.Split("---", StringSplitOptions.RemoveEmptyEntries);
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-5 fw-bold text-primary">Your Flight Results</h1>
-        <p class="text-muted">Here are the cheapest flights we found for your trip.</p>
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary">✈️ Your Flight Options</h1>
+        <p class="text-muted">Cheapest and smartest flights for your route</p>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var flight in flights)
+        {
+            var lines = flight.Trim().Split("\n");
+            string airline = lines.FirstOrDefault(l => l.StartsWith("Airline:"))?.Split("Airline:")[1].Trim();
+            string code = lines.FirstOrDefault(l => l.StartsWith("Flight Code"))?.Split(":")[1].Trim();
+            string dep = lines.FirstOrDefault(l => l.StartsWith("Departure:"))?.Split(":")[1].Trim();
+            string arr = lines.FirstOrDefault(l => l.StartsWith("Arrival:"))?.Split(":")[1].Trim();
+            string dur = lines.FirstOrDefault(l => l.StartsWith("Duration:"))?.Split(":")[1].Trim();
+            string stops = lines.FirstOrDefault(l => l.StartsWith("Stops:"))?.Split(":")[1].Trim();
+            string price = lines.FirstOrDefault(l => l.StartsWith("Price:"))?.Split(":")[1].Trim();
+            string lockInfo = lines.FirstOrDefault(l => l.StartsWith("Lock Price Info"))?.Split(":")[1].Trim();
+            string discount = lines.FirstOrDefault(l => l.StartsWith("Discount Offers"))?.Split(":")[1].Trim();
+            string refund = lines.FirstOrDefault(l => l.StartsWith("Refund Policy"))?.Split(":")[1].Trim();
+        <div class="col">
+            <div class="card shadow border-0">
                 <div class="card-body">
-                    <pre class="bg-light rounded p-4 text-dark" style="white-space: pre-wrap;">@Model</pre>
+                    <h5 class="card-title text-primary">@airline <span class="text-muted">(@code)</span></h5>
+                    <p class="mb-1"><strong>🕓 Departure:</strong> @dep</p>
+                    <p class="mb-1"><strong>🛬 Arrival:</strong> @arr</p>
+                    <p class="mb-1"><strong>⏱ Duration:</strong> @dur</p>
+                    <p class="mb-1"><strong>🛑 Stops:</strong> @stops</p>
+                    <p class="mb-1"><strong>🔁 Refund:</strong> @refund</p>
+                    @if (!string.IsNullOrWhiteSpace(lockInfo) && lockInfo != "N/A")
+                    {
+                        <p class="text-info"><strong>🔒 Lock Price:</strong> @lockInfo</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(discount))
+                    {
+                        <span class="badge bg-success">@discount</span>
+                    }
+                    <div class="mt-3">
+                        <span class="fs-4 fw-bold text-success">@price</span>
+                    </div>
                 </div>
             </div>
-
-            <div class="d-grid mt-4">
-                <a href="/" class="btn btn-primary btn-lg">
-                    🔍 Search Again
-                </a>
-            </div>
         </div>
+        }
+    </div>
+
+    <div class="d-grid mt-5">
+        <a href="/" class="btn btn-outline-primary btn-lg">
+            🔁 Search Again
+        </a>
     </div>
 </div>

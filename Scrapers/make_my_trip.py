@@ -42,7 +42,7 @@ date_str = sys.argv[3]
 
 options = uc.ChromeOptions()
 options.add_argument("--start-maximized")
-options.add_argument("--headless=new")
+#options.add_argument("--headless=new")
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument("--window-size=1920,1080")
 options.add_argument("--no-sandbox")
@@ -69,7 +69,8 @@ from_click_area.click()
 from_input = driver.find_element(By.XPATH, "//input[@placeholder='From']")
 from_input.send_keys(from_city)
 time.sleep(1)
-ActionChains(driver).move_by_offset(0, 100).click().perform()
+actions = ActionChains(driver)
+actions.send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
 
 escape(driver)
 closePopups(driver)
@@ -79,7 +80,8 @@ to_click_area.click()
 to_input = driver.find_element(By.XPATH, "//input[@placeholder='To']")
 to_input.send_keys(to_city)
 time.sleep(1)
-ActionChains(driver).move_by_offset(0, 100).click().perform()
+actions = ActionChains(driver)
+actions.send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
 
 escape(driver)
 closePopups(driver)
@@ -100,13 +102,48 @@ closePopups(driver)
 
 time.sleep(1)
 
+
 try:
-    elem = driver.find_element(By.CSS_SELECTOR, "p.blackText.fontSize12[data-test='component-clusterHeader']")
-    text = elem.text 
-    price, duration = map(str.strip, text.split('|'))
-    print("Price:", price)
+    container = driver.find_element(By.CSS_SELECTOR, "div[data-test='component-clusterItem']")
+
+    airline = container.find_element(By.CSS_SELECTOR, "p.airlineName").text
+    flight_code = container.find_element(By.CSS_SELECTOR, "p.fliCode").text
+
+    departure_time = container.find_element(By.CSS_SELECTOR, ".timeInfoLeft span").text
+    departure_city = container.find_element(By.CSS_SELECTOR, ".timeInfoLeft p.blackText").text
+
+    arrival_time = container.find_element(By.CSS_SELECTOR, ".timeInfoRight span").text
+    arrival_info = container.find_element(By.CSS_SELECTOR, ".timeInfoRight p.blackText").text
+    try:
+        arrival_day = container.find_element(By.CSS_SELECTOR, ".plusDisplayText").text
+    except:
+        arrival_day = ""
+
+    duration = container.find_element(By.CSS_SELECTOR, ".stop-info p").text
+    stops = container.find_element(By.CSS_SELECTOR, ".flightsLayoverInfo").text
+
+    price = container.find_element(By.CSS_SELECTOR, ".clusterViewPrice span").text
+
+    lock_price = container.find_element(By.CSS_SELECTOR, "[data-test='component-lockPricePersuasionText']").text
+
+    discount_info = container.find_element(By.CSS_SELECTOR, "p.alertMsg span").text
+
+    refund_policy = container.find_element(By.CSS_SELECTOR, ".ftr-persuasion").text
+
+    print("Cheapest Rates from Make My Trip:")
+    print("Airline:", airline)
+    print("Flight Code(s):", flight_code)
+    print("Departure:", f"{departure_time} — {departure_city}")
+    print("Arrival:", f"{arrival_time} {arrival_day} — {arrival_info}")
     print("Duration:", duration)
-except:
-    print("Flights not found")
+    print("Stops:", stops)
+    print("Price:", price)
+    print("Lock Price Info:", lock_price)
+    print("Discount Offers:", discount_info)
+    print("Refund Policy:", refund_policy)
+
+except Exception as e:
+    print("Error: Flights not found or DOM structure changed.")
+    print(e)
 
 driver.quit()
