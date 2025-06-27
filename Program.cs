@@ -18,6 +18,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+//chatbot
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
 // MVC
 builder.Services.AddControllersWithViews(); // ✅ for MVC
 

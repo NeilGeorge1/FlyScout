@@ -68,5 +68,89 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <!-- Chatbot Widget -->
+    <div id="chatbot-toggle" style="
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 9999;
+    ">
+        💬
+    </div>
+
+    <div id="chatbot-window" style="
+        position: fixed;
+        bottom: 100px;
+        right: 25px;
+        width: 350px;
+        max-height: 500px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: none;
+        flex-direction: column;
+        z-index: 9999;
+    ">
+        <div style="background-color: #007bff; color: white; padding: 10px; font-weight: bold;">
+            FlyScout Chatbot
+            <span style="float: right; cursor: pointer;" onclick="document.getElementById('chatbot-window').style.display='none'">×</span>
+        </div>
+        <div class="chat-body" style="padding: 10px; height: 300px; overflow-y: auto;"></div>
+        <form id="chatForm" style="display: flex; border-top: 1px solid #ddd;">
+            <input name="UserInput" class="form-control" placeholder="Ask me anything..." style="border: none; border-radius: 0;" required />
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("chatbot-toggle").addEventListener("click", () => {
+            const chatWindow = document.getElementById("chatbot-window");
+            chatWindow.style.display = chatWindow.style.display === "none" ? "flex" : "none";
+        });
+
+        document.getElementById("chatForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const input = this.querySelector("input[name='UserInput']");
+            const message = input.value;
+            const body = document.querySelector(".chat-body");
+
+            if (!message.trim()) return;
+
+            // Show user's message
+            body.insertAdjacentHTML("beforeend", `<div class="alert alert-secondary mt-2"><strong>You:</strong> ${message}</div>`);
+
+            const response = await fetch("/Home/Chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `userInput=${encodeURIComponent(message)}`
+            });
+
+            const data = await response.json();
+
+            if (data.reply) {
+                body.insertAdjacentHTML("beforeend", `<div class="alert alert-success mt-2"><strong>Bot:</strong> ${data.reply}</div>`);
+            } else if (data.error) {
+                body.insertAdjacentHTML("beforeend", `<div class="alert alert-danger mt-2"><strong>Error:</strong> ${data.error}</div>`);
+            }
+
+            input.value = "";
+            body.scrollTop = body.scrollHeight; // Auto scroll
+        });
+    </script>
+
 </body>
 </html>
