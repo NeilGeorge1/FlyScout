@@ -1,0 +1,29 @@
+@model string
+@{
+    ViewData["Title"] = "Flight Results";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-primary">Your Flight Results</h1>
+        <p class="text-muted">Here are the cheapest flights we found for your trip.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <pre class="bg-light rounded p-4 text-dark" style="white-space: pre-wrap;">@Model</pre>
+                </div>
+            </div>
+
+            <div class="d-grid mt-4">
+                <a href="/" class="btn btn-primary btn-lg">
+                    🔍 Search Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

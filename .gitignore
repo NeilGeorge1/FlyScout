@@ -1,0 +1,33 @@
+# .NET build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider and VS Code
+.idea/
+.vscode/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# ASP.NET secrets 
+secrets.json
+
+# SQLite DB files 
+*.db
+*.sqlite
+
+# Python env inside Scrapers
+Scrapers/env/
+Scrapers/env/**
+
+# VS autogen files
+*.dbmdl
+*.cache
+*.log
