@@ -28,7 +28,7 @@ public class HomeController : Controller
     public IActionResult RunScripts(string from, string to, DateTime date)
     {
         string formattedDate = date.ToString("ddd MMM dd yyyy");
-        List<string> paths = new List<string> { "Scrapers/goibibo.py", "Scrapers/make_my_trip.py"};
+        List<string> paths = new List<string> { "Scrapers/goibibo.py"};
 
         List<string> allOutputs = new List<string>();
 
@@ -97,6 +97,7 @@ public class HomeController : Controller
         var apiKey = _config["Cohere:ApiKey"];
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
         client.DefaultRequestHeaders.Add("accept", "application/json");
+Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_KEY"));
 
         //in context learning
         var promptWithContext = @"

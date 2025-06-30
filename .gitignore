@@ -31,3 +31,6 @@ Scrapers/env/**
 *.dbmdl
 *.cache
 *.log
+
+#.env
+.env

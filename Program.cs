@@ -1,8 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FlyScout.Data;
+using DotNetEnv;
+
+DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration["Cohere:ApiKey"] = Environment.GetEnvironmentVariable("COHERE_API_KEY");
+
+Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_KEY"));
 
 // Listen only on HTTP
 builder.WebHost.UseUrls("http://localhost:5000");
