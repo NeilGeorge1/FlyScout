@@ -103,6 +103,9 @@ try:
     if not flights:
         print("No flights found")
 
+    print("Cheapest Rates from Goibibo:")
+
+    count = 0
     for flight in flights:
         airline = flight.find_element(By.XPATH, ".//p[@data-test='component-airlineHeading']").text
         flight_code = flight.find_element(By.CLASS_NAME, "fliCode").text
@@ -137,8 +140,22 @@ try:
         except:
             refund_policy = "N/A"
 
-        # Print Output
-        print("Cheapest Rates from Goibibo:")
+        try:
+            logo_element = flight.find_element(By.XPATH, ".//span[contains(@class, 'arln-logo')]")
+            style_attr = logo_element.get_attribute("style")
+            # Extract the URL from style: background-image: url("...");
+            import re
+            match = re.search(r'url\(&quot;(.+?)&quot;\)', style_attr)
+            logo_url = match.group(1) if match else ""
+        except:
+            logo_url = ""
+
+        try:
+            link_element = flight.find_element(By.XPATH, ".//a[contains(@class, 'FlightListingCard')]")
+            goibibo_link = link_element.get_attribute("href")
+        except:
+            goibibo_link = url
+
         print("Airline:", airline)
         print("Flight Code(s):", flight_code)
         print("Departure:", f"{departure_time} — {departure_city}")
@@ -149,12 +166,16 @@ try:
         print("Lock Price Info:", lock_price)
         print("Discount Offers:", discount_info)
         print("Refund Policy:", refund_policy)
-        print("="*60)
-        break  # Only the first flight (cheapest)
-        
+        print("Logo URL:", logo_url)
+        print("Goibibo Link:", goibibo_link)
+        print("---")  # Delimiter for CSHTML parsing
+
+        count += 1
+        if count >= 4:  
+            break
+
 except Exception as e:
     print("Flights not found due to:", e)
-
 
 time.sleep(1)
 driver.quit()
