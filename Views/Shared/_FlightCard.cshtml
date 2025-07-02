@@ -1,0 +1,88 @@
+@model string
+
+@{
+    var lines = Model.Trim().Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+    string Get(string key) => lines.FirstOrDefault(l => l.StartsWith(key))?.Split(":", 2)[1].Trim();
+
+    var airline = Get("Airline");
+    var code = Get("Flight Code");
+    var dep = Get("Departure");
+    var arr = Get("Arrival");
+    var dur = Get("Duration");
+    var stops = Get("Stops");
+    var price = Get("Price");
+    var lockInfo = Get("Lock Price Info");
+    var discount = Get("Discount Offers");
+    var refund = Get("Refund Policy");
+    var logo = Get("Logo URL");
+    var link = Get("Goibibo Link") ?? "https://www.goibibo.com";
+}
+
+<div class="col-12 col-md-6 col-xl-4">
+    <div class="card h-100 shadow-sm border-0 hover-card">
+        <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                <div class="airline-logo-container me-3">
+                    @if (string.IsNullOrWhiteSpace(logo))
+                    {
+                        <span class="airline-icon">✈️</span>
+                    }
+                    else
+                    {
+                        <img src="@logo" alt="@airline Logo" class="airline-logo" onerror="this.parentElement.innerHTML='✈️'" />
+                    }
+                </div>
+                <div>
+                    <h5 class="card-title mb-1 fw-bold text-dark">@airline</h5>
+                    @if (!string.IsNullOrWhiteSpace(code))
+                    {
+                        <small class="text-muted">@code</small>
+                    }
+                </div>
+            </div>
+
+            <div class="flight-details mb-4">
+                @if (dep != null)
+                {
+                    <div class="row mb-2"><div class="col-auto">🛫</div><div class="col"><small class="text-muted">Departure</small><div>@dep</div></div></div>
+                }
+                @if (arr != null)
+                {
+                    <div class="row mb-2"><div class="col-auto">🛬</div><div class="col"><small class="text-muted">Arrival</small><div>@arr</div></div></div>
+                }
+                @if (dur != null)
+                {
+                    <div class="row mb-2"><div class="col-auto">⏱️</div><div class="col"><small class="text-muted">Duration</small><div>@dur</div></div></div>
+                }
+                @if (stops != null)
+                {
+                    <div class="row mb-2"><div class="col-auto">🛑</div><div class="col"><small class="text-muted">Stops</small><div>@stops</div></div></div>
+                }
+                @if (refund != null)
+                {
+                    <div class="row mb-2"><div class="col-auto">🔄</div><div class="col"><small class="text-muted">Refund</small><div>@refund</div></div></div>
+                }
+            </div>
+
+            @if (lockInfo != "N/A")
+            {
+                <div class="alert alert-info py-2 px-3 mb-3"><small><strong>🔒 Lock Price:</strong> @lockInfo</small></div>
+            }
+
+            @*
+            @if (discount != "N/A")
+            {
+                <div class="mb-3"><span class="badge bg-success">🎉 @discount</span></div>
+            }
+            *@
+
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                @if (price != null)
+                {
+                    <div><small class="text-muted">Total Price</small><div class="h5 text-success fw-bold">@price</div></div>
+                }
+                <a href="@link" class="btn btn-primary btn-sm px-4" target="_blank">Book Now →</a>
+            </div>
+        </div>
+    </div>
+</div>

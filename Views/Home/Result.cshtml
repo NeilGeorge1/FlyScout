@@ -1,176 +1,53 @@
 @model string
+
 @{
     ViewData["Title"] = "Flight Results";
-    var flights = Model.Split("---", StringSplitOptions.RemoveEmptyEntries);
+    var flights = Model?.Split("---", StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
+    var chunkThreshold = 3;
 }
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container py-4">
     <div class="text-center mb-5">
         <h1 class="display-5 fw-bold text-primary mb-2">✈️ Your Flight Options</h1>
-        <p class="lead text-muted">Cheapest and smartest flights for your route</p>
+        <p class="lead text-muted">Cheapest and Smartest flights for your route</p>
     </div>
-    
-    <div class="row g-4">
-        @foreach (var flight in flights)
-        {
-            var lines = flight.Trim().Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            string airline = lines.FirstOrDefault(l => l.StartsWith("Airline:"))?.Split(":", 2)[1].Trim();
-            string code = lines.FirstOrDefault(l => l.StartsWith("Flight Code"))?.Split(":", 2)[1].Trim();
-            string dep = lines.FirstOrDefault(l => l.StartsWith("Departure:"))?.Split(":", 2)[1].Trim();
-            string arr = lines.FirstOrDefault(l => l.StartsWith("Arrival:"))?.Split(":", 2)[1].Trim();
-            string dur = lines.FirstOrDefault(l => l.StartsWith("Duration:"))?.Split(":", 2)[1].Trim();
-            string stops = lines.FirstOrDefault(l => l.StartsWith("Stops:"))?.Split(":", 2)[1].Trim();
-            string price = lines.FirstOrDefault(l => l.StartsWith("Price:"))?.Split(":", 2)[1].Trim();
-            string lockInfo = lines.FirstOrDefault(l => l.StartsWith("Lock Price Info"))?.Split(":", 2)[1].Trim();
-            string discount = lines.FirstOrDefault(l => l.StartsWith("Discount Offers"))?.Split(":", 2)[1].Trim();
-            string refund = lines.FirstOrDefault(l => l.StartsWith("Refund Policy"))?.Split(":", 2)[1].Trim();
-            string logo = lines.FirstOrDefault(l => l.StartsWith("Logo URL:"))?.Split(":", 2)[1].Trim();
-            string link = lines.FirstOrDefault(l => l.StartsWith("Goibibo Link:"))?.Split(":", 2)[1].Trim();
-            
-        <div class="col-12 col-md-6 col-xl-4">
-            <div class="card h-100 shadow-sm border-0 hover-card">
-                <div class="card-body p-4">
-                    <!-- Airline Header -->
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        @if (!string.IsNullOrWhiteSpace(logo))
-                        {
-                            <div class="airline-logo-container me-3">
-                                <img src="@logo" alt="@airline Logo" class="airline-logo" onerror="this.parentElement.innerHTML='✈️'" />
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="airline-logo-container me-3">
-                                <span class="airline-icon">✈️</span>
-                            </div>
-                        }
-                        <div>
-                            <h5 class="card-title mb-1 fw-bold text-dark">@airline</h5>
-                            @if (!string.IsNullOrWhiteSpace(code))
-                            {
-                                <small class="text-muted">@code</small>
-                            }
-                        </div>
-                    </div>
-                    
-                    <!-- Flight Details -->
-                    <div class="flight-details mb-4">
-                        @if (!string.IsNullOrWhiteSpace(dep))
-                        {
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span class="text-primary">🛫</span>
-                                </div>
-                                <div class="col">
-                                    <small class="text-muted d-block">Departure</small>
-                                    <span class="fw-medium">@dep</span>
-                                </div>
-                            </div>
-                        }
-                        
-                        @if (!string.IsNullOrWhiteSpace(arr))
-                        {
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span class="text-success">🛬</span>
-                                </div>
-                                <div class="col">
-                                    <small class="text-muted d-block">Arrival</small>
-                                    <span class="fw-medium">@arr</span>
-                                </div>
-                            </div>
-                        }
-                        
-                        @if (!string.IsNullOrWhiteSpace(dur))
-                        {
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span class="text-info">⏱️</span>
-                                </div>
-                                <div class="col">
-                                    <small class="text-muted d-block">Duration</small>
-                                    <span class="fw-medium">@dur</span>
-                                </div>
-                            </div>
-                        }
-                        
-                        @if (!string.IsNullOrWhiteSpace(stops))
-                        {
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span class="text-warning">🛑</span>
-                                </div>
-                                <div class="col">
-                                    <small class="text-muted d-block">Stops</small>
-                                    <span class="fw-medium">@stops</span>
-                                </div>
-                            </div>
-                        }
-                        
-                        @if (!string.IsNullOrWhiteSpace(refund))
-                        {
-                            <div class="row mb-2">
-                                <div class="col-auto">
-                                    <span class="text-secondary">🔄</span>
-                                </div>
-                                <div class="col">
-                                    <small class="text-muted d-block">Refund Policy</small>
-                                    <span class="fw-medium">@refund</span>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                    
-                    <!-- Additional Info -->
-                    @if (!string.IsNullOrWhiteSpace(lockInfo) && lockInfo != "N/A")
+
+    @if (flights.Length > 0)
+    {
+        <h2 class="mb-4 text-success text-center fw-bold">💰 Cheapest Flights</h2>
+        <div class="row g-4 mb-5">
+            @{
+                var index = 0;
+                foreach (var flight in flights)
+                {
+                    if (index == chunkThreshold)
                     {
-                        <div class="alert alert-info py-2 px-3 mb-3">
-                            <small><strong>🔒 Lock Price:</strong> @lockInfo</small>
-                        </div>
+                        break;
                     }
-                    
-                    @if (!string.IsNullOrWhiteSpace(discount) && discount != "N/A")
-                    {
-                        <div class="mb-3">
-                            <div class="discount-badge">
-                                <span class="badge bg-success">🎉 @discount</span>
-                            </div>
-                        </div>
-                    }
-                    
-                    <!-- Price and Action -->
-                    <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
-                        @if (!string.IsNullOrWhiteSpace(price))
-                        {
-                            <div>
-                                <small class="text-muted d-block">Total Price</small>
-                                <span class="h4 fw-bold text-success mb-0">@price</span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(link))
-                        {
-                            <a href="@link" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm px-4">
-                                Book Now <i class="ms-1">→</i>
-                            </a>
-                        }
-                        else
-                        {
-                            <a href="https://www.goibibo.com" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm px-4">
-                                View on Goibibo <i class="ms-1">→</i>
-                            </a>
-                        }
-                    </div>
-                </div>
-            </div>
+                    @Html.Partial("_FlightCard", flight)
+                    index++;
+                }
+            }
         </div>
+
+        @if (flights.Length > chunkThreshold)
+        {
+            <h2 class="mb-4 text-info text-center fw-bold">⚡ Fastest / Non-Stop Flights</h2>
+            <div class="row g-4 mb-5">
+                @{
+                    for (int i = chunkThreshold; i < flights.Length; i++)
+                    {
+                        @Html.Partial("_FlightCard", flights[i])
+                    }
+                }
+            </div>
         }
-    </div>
-    
+    }
+
     <div class="text-center mt-5 pt-4">
-        <a href="/" class="btn btn-outline-primary btn-lg px-5">
-            🔍 Search for More Flights
-        </a>
+        <a href="/" class="btn btn-outline-primary btn-lg px-5">🔍 Search for More Flights</a>
     </div>
 </div>
 
@@ -178,25 +55,20 @@
 .hover-card {
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-
 .hover-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
 }
-
 .flight-details .row {
     align-items: center;
 }
-
 .card-body {
     display: flex;
     flex-direction: column;
 }
-
 .mt-auto {
     margin-top: auto !important;
 }
-
 .airline-logo-container {
     width: 48px;
     height: 48px;
@@ -207,43 +79,35 @@
     border-radius: 8px;
     border: 1px solid #e9ecef;
 }
-
 .airline-logo {
     width: 40px;
     height: 40px;
     object-fit: contain;
     border-radius: 4px;
 }
-
 .airline-icon {
     font-size: 24px;
     color: #6c757d;
 }
-
 .discount-badge {
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
-
 .discount-badge .badge {
     white-space: normal;
-    word-wrap: break-word;
     max-width: 100%;
     padding: 8px 12px;
     font-size: 0.875rem;
     line-height: 1.2;
 }
-
 @@media (max-width: 768px) {
     .container {
         padding-left: 15px;
         padding-right: 15px;
     }
-    
     .card-body {
         padding: 1.5rem !important;
     }
-    
     .discount-badge .badge {
         font-size: 0.8rem;
         padding: 6px 10px;
