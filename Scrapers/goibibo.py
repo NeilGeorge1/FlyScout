@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
+import re
 
 def escape(driver):
     try:
@@ -14,29 +15,113 @@ def escape(driver):
 
 def closePopups(driver):
     popup_selectors = [
-        ".commonModal__close",                # login popup
-        ".langCardClose",                     # language/currency modal
-        ".overlayCrossIcon",                  # offer banner overlay
-        ".newsletter__close",                 # newsletter sign-up
-        "#webklipper-publisher-widget-container .close",  # chatbot or feedback popups
+        ".commonModal__close",
+        ".langCardClose",
+        ".overlayCrossIcon",
+        ".newsletter__close",
+        "#webklipper-publisher-widget-container .close",
     ]
 
     for selector in popup_selectors:
         try:
-            element = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
-            )
+            element = driver.find_element(By.CSS_SELECTOR, selector)
             driver.execute_script("arguments[0].click();", element)
             print(f"Closed popup: {selector}")
         except Exception:
-            pass  
+            pass
 
     try:
         driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.ESCAPE)
     except:
         print("Could not send ESCAPE")
-   
-#############################################################     
+    
+    try:
+        got_it_btn = driver.find_element(By.CSS_SELECTOR, "span[data-testid='coachmark-overlay-button']")
+        if got_it_btn.is_displayed():
+            got_it_btn.click()
+            print("Closed: GOT IT coachmark popup")
+    except:
+        print("Could not close the got it")
+
+
+def scrape_flights(title_text):
+    try:
+        flights = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterItem']")
+        
+        if not flights:
+            print(f"No flights found for {title_text}")
+            return
+
+        print(f"\n{title_text} Flights from Goibibo:\n")
+
+        count = 0
+        for flight in flights:
+            airline = flight.find_element(By.XPATH, ".//p[@data-test='component-airlineHeading']").text
+            flight_code = flight.find_element(By.CLASS_NAME, "fliCode").text
+
+            departure_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//span").text
+            departure_city = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//font").text
+
+            arrival_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[1]").text
+            try:
+                arrival_day = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[contains(text(),'+')]").text
+            except:
+                arrival_day = ""
+            arrival_info = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//font").text
+
+            duration = flight.find_element(By.XPATH, ".//div[contains(@class, 'stop-info')]//p[1]").text
+            stops = flight.find_element(By.XPATH, ".//p[contains(@class,'flightsLayoverInfo')]").text
+
+            price = flight.find_element(By.XPATH, ".//div[contains(@class,'clusterViewPrice')]//span").text
+
+            try:
+                lock_price = flight.find_element(By.XPATH, ".//span[@data-test='component-lockPricePersuasionText']").text
+            except:
+                lock_price = "N/A"
+
+            try:
+                discount_info = flight.find_element(By.XPATH, ".//p[contains(@class,'alertMsg')]").text
+            except:
+                discount_info = "N/A"
+
+            try:
+                refund_policy = flight.find_element(By.XPATH, ".//span[contains(@class,'ftr-persuasion')]").text
+            except:
+                refund_policy = "N/A"
+
+            try:
+                logo_element = flight.find_element(By.XPATH, ".//span[contains(@class, 'arln-logo')]")
+                style_attr = logo_element.get_attribute("style")
+                match = re.search(r'url\(&quot;(.+?)&quot;\)', style_attr)
+                logo_url = match.group(1) if match else ""
+            except:
+                logo_url = ""
+
+            try:
+                link_element = flight.find_element(By.XPATH, ".//a[contains(@class, 'FlightListingCard')]")
+                goibibo_link = link_element.get_attribute("href")
+            except:
+                goibibo_link = url
+
+            print("Airline:", airline)
+            print("Flight Code(s):", flight_code)
+            print("Departure:", f"{departure_time} — {departure_city}")
+            print("Arrival:", f"{arrival_time} {arrival_day} — {arrival_info}")
+            print("Duration:", duration)
+            print("Stops:", stops)
+            print("Price:", price)
+            print("Lock Price Info:", lock_price)
+            print("Discount Offers:", discount_info)
+            print("Refund Policy:", refund_policy)
+            print("Logo URL:", logo_url)
+            print("Goibibo Link:", goibibo_link)
+            print("---")
+
+            count += 1
+            if count >= 3:
+                break
+    except Exception as e:
+        print(f"Flights not found due to: {e}")
 
 from_city = sys.argv[1]
 to_city = sys.argv[2]
@@ -86,7 +171,6 @@ escape(driver)
 
 departure_field = driver.find_element(By.XPATH, "//div[contains(@class, 'fswFld') and .//span[text()='Departure']]")
 departure_field.click()
-#target_date = "Wed Jun 25 2025"
 desired_date = driver.find_element(By.XPATH, f"//div[@aria-label='{date}']")
 desired_date.click()
 
@@ -97,85 +181,16 @@ search_btn.click()
 
 closePopups(driver)
 
-try:
-    flights = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterItem']")
-    
-    if not flights:
-        print("No flights found")
+scrape_flights("Cheapest")
 
-    print("Cheapest Rates from Goibibo:")
+time.sleep(1)
 
-    count = 0
-    for flight in flights:
-        airline = flight.find_element(By.XPATH, ".//p[@data-test='component-airlineHeading']").text
-        flight_code = flight.find_element(By.CLASS_NAME, "fliCode").text
-
-        departure_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//span").text
-        departure_city = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//font").text
-
-        arrival_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[1]").text
-        try:
-            arrival_day = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[contains(text(),'+')]").text
-        except:
-            arrival_day = ""
-        arrival_info = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//font").text
-
-        duration = flight.find_element(By.XPATH, ".//div[contains(@class, 'stop-info')]//p[1]").text
-        stops = flight.find_element(By.XPATH, ".//p[contains(@class,'flightsLayoverInfo')]").text
-
-        price = flight.find_element(By.XPATH, ".//div[contains(@class,'clusterViewPrice')]//span").text
-
-        try:
-            lock_price = flight.find_element(By.XPATH, ".//span[@data-test='component-lockPricePersuasionText']").text
-        except:
-            lock_price = "N/A"
-
-        try:
-            discount_info = flight.find_element(By.XPATH, ".//p[contains(@class,'alertMsg')]").text
-        except:
-            discount_info = "N/A"
-
-        try:
-            refund_policy = flight.find_element(By.XPATH, ".//span[contains(@class,'ftr-persuasion')]").text
-        except:
-            refund_policy = "N/A"
-
-        try:
-            logo_element = flight.find_element(By.XPATH, ".//span[contains(@class, 'arln-logo')]")
-            style_attr = logo_element.get_attribute("style")
-            # Extract the URL from style: background-image: url("...");
-            import re
-            match = re.search(r'url\(&quot;(.+?)&quot;\)', style_attr)
-            logo_url = match.group(1) if match else ""
-        except:
-            logo_url = ""
-
-        try:
-            link_element = flight.find_element(By.XPATH, ".//a[contains(@class, 'FlightListingCard')]")
-            goibibo_link = link_element.get_attribute("href")
-        except:
-            goibibo_link = url
-
-        print("Airline:", airline)
-        print("Flight Code(s):", flight_code)
-        print("Departure:", f"{departure_time} — {departure_city}")
-        print("Arrival:", f"{arrival_time} {arrival_day} — {arrival_info}")
-        print("Duration:", duration)
-        print("Stops:", stops)
-        print("Price:", price)
-        print("Lock Price Info:", lock_price)
-        print("Discount Offers:", discount_info)
-        print("Refund Policy:", refund_policy)
-        print("Logo URL:", logo_url)
-        print("Goibibo Link:", goibibo_link)
-        print("---")  # Delimiter for CSHTML parsing
-
-        count += 1
-        if count >= 4:  
-            break
-
-except Exception as e:
-    print("Flights not found due to:", e)
+cluster_tabs = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterTabItem']")
+if len(cluster_tabs) > 1:
+    cluster_tabs[1].click()
+    scrape_flights("Second Tab (Fastest/Non Stop)")
+else:
+    print("Second tab not found.")
 
 time.sleep(1)
 driver.quit()
