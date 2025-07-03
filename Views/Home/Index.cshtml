@@ -39,21 +39,84 @@
     </div>
 
     <form asp-action="RunScripts" method="post" class="form-container mx-auto">
+        <!-- From City -->
         <div class="mb-4">
             <label for="from" class="form-label"><i class="bi bi-geo-alt-fill"></i>From</label>
             <input type="text" name="from" id="from" class="form-control" placeholder="Enter departure city" required>
         </div>
 
+        <!-- To City -->
         <div class="mb-4">
             <label for="to" class="form-label"><i class="bi bi-geo-fill"></i>To</label>
             <input type="text" name="to" id="to" class="form-control" placeholder="Enter destination city" required>
         </div>
 
+        <!-- Date -->
         <div class="mb-4">
             <label for="date" class="form-label"><i class="bi bi-calendar-event-fill"></i>Date of Travel</label>
             <input type="date" name="date" id="date" class="form-control" required>
         </div>
 
+        <!-- Travellers and Class -->
+        <h5 class="mb-3 fw-bold text-primary">Travellers & Class</h5>
+
+        <!-- Adults -->
+        <div class="mb-4">
+            <label class="form-label">Adults <span class="text-muted">(Aged 12+ yrs)</span></label>
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('adults', -1)">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+                <span id="adults-count" class="fs-5">1</span>
+                <input type="hidden" name="adults" id="adults" value="2" />
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('adults', 1)">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Children -->
+        <div class="mb-4">
+            <label class="form-label">Children <span class="text-muted">(Aged 2-12 yrs)</span></label>
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('children', -1)">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+                <span id="children-count" class="fs-5">1</span>
+                <input type="hidden" name="children" id="children" value="1" />
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('children', 1)">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Infants -->
+        <div class="mb-4">
+            <label class="form-label">Infants <span class="text-muted">(Below 2 yrs)</span></label>
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('infants', -1)">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+                <span id="infants-count" class="fs-5">1</span>
+                <input type="hidden" name="infants" id="infants" value="1" />
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="changeCount('infants', 1)">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Class -->
+        <div class="mb-4">
+            <label class="form-label">Travel Class</label>
+            <select class="form-select" name="travelClass" required>
+                <option value="economy">Economy</option>
+                <option value="premium economy">Premium Economy</option>
+                <option value="business" selected>Business</option>
+                <option value="first class">First Class</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
         <div class="d-grid">
             <button type="submit" class="btn btn-primary btn-lg">
                 <i class="bi bi-search"></i> Get Best Prices
@@ -61,3 +124,14 @@
         </div>
     </form>
 </div>
+
+<script>
+    function changeCount(type, delta) {
+        const countSpan = document.getElementById(`${type}-count`);
+        const hiddenInput = document.getElementById(type);
+        let value = parseInt(countSpan.innerText);
+        value = Math.max(0, value + delta); // prevent negative values
+        countSpan.innerText = value;
+        hiddenInput.value = value;
+    }
+</script>

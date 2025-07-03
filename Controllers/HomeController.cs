@@ -27,7 +27,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
-    public IActionResult RunScripts(string from, string to, DateTime date)
+    public IActionResult RunScripts(string from, string to, DateTime date, int adults, int children, int infants, string travelClass)
     {
         string formattedDate = date.ToString("ddd MMM dd yyyy");
         List<string> paths = new List<string> { "Scrapers/goibibo.py"};
@@ -38,7 +38,7 @@ public class HomeController : Controller
         {
             var psi = new ProcessStartInfo();
             psi.FileName = "/home/neil/Projects/FlyScout/Scrapers/env/bin/python";
-            psi.Arguments = $"{scriptPath} \"{from}\" \"{to}\" \"{formattedDate}\"";
+            psi.Arguments = $"{scriptPath} \"{from}\" \"{to}\" \"{formattedDate}\" {adults} {children} {infants} \"{travelClass}\"";
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
             psi.CreateNoWindow = true;

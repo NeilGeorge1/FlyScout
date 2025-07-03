@@ -11,7 +11,7 @@ def escape(driver):
         body = driver.find_element(By.TAG_NAME, 'body')
         body.send_keys(Keys.ESCAPE)
     except:
-        print("Escape Key didnt work!")
+        print("Escape Key didn’t work!")
 
 def closePopups(driver):
     popup_selectors = [
@@ -21,74 +21,69 @@ def closePopups(driver):
         ".newsletter__close",
         "#webklipper-publisher-widget-container .close",
     ]
-
     for selector in popup_selectors:
         try:
             element = driver.find_element(By.CSS_SELECTOR, selector)
             driver.execute_script("arguments[0].click();", element)
             print(f"Closed popup: {selector}")
-        except Exception:
+        except:
             pass
-
     try:
         driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.ESCAPE)
     except:
         print("Could not send ESCAPE")
-    
     try:
         got_it_btn = driver.find_element(By.CSS_SELECTOR, "span[data-testid='coachmark-overlay-button']")
         if got_it_btn.is_displayed():
             got_it_btn.click()
             print("Closed: GOT IT coachmark popup")
     except:
-        print("Could not close the got it")
+        print("Could not close the GOT IT")
 
+def increase_count(driver, label, target_count):
+    section = driver.find_element(By.XPATH, f"//p[text()='{label}']/ancestor::div[contains(@class, 'pZQPB')]")
+    count_elem = section.find_element(By.XPATH, ".//span[contains(@class, 'jueHCN')]")
+    plus_btn = section.find_elements(By.XPATH, ".//span[contains(@class, 'kZvHQU')]")[1]
+    current = int(count_elem.text)
+    while current < target_count:
+        plus_btn.click()
+        time.sleep(0.2)
+        current += 1
 
 def scrape_flights(title_text):
     try:
         flights = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterItem']")
-        
         if not flights:
             print(f"No flights found for {title_text}")
             return
-
         print(f"\n{title_text} Flights from Goibibo:\n")
-
         count = 0
         for flight in flights:
             airline = flight.find_element(By.XPATH, ".//p[@data-test='component-airlineHeading']").text
             flight_code = flight.find_element(By.CLASS_NAME, "fliCode").text
-
             departure_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//span").text
             departure_city = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoLeft')]//font").text
-
             arrival_time = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[1]").text
             try:
                 arrival_day = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//span[contains(text(),'+')]").text
             except:
                 arrival_day = ""
             arrival_info = flight.find_element(By.XPATH, ".//div[contains(@class,'timeInfoRight')]//font").text
-
             duration = flight.find_element(By.XPATH, ".//div[contains(@class, 'stop-info')]//p[1]").text
             stops = flight.find_element(By.XPATH, ".//p[contains(@class,'flightsLayoverInfo')]").text
-
             price = flight.find_element(By.XPATH, ".//div[contains(@class,'clusterViewPrice')]//span").text
-
             try:
                 lock_price = flight.find_element(By.XPATH, ".//span[@data-test='component-lockPricePersuasionText']").text
             except:
                 lock_price = "N/A"
-
             try:
                 discount_info = flight.find_element(By.XPATH, ".//p[contains(@class,'alertMsg')]").text
             except:
                 discount_info = "N/A"
-
             try:
                 refund_policy = flight.find_element(By.XPATH, ".//span[contains(@class,'ftr-persuasion')]").text
             except:
                 refund_policy = "N/A"
-
             try:
                 logo_element = flight.find_element(By.XPATH, ".//span[contains(@class, 'arln-logo')]")
                 style_attr = logo_element.get_attribute("style")
@@ -96,13 +91,11 @@ def scrape_flights(title_text):
                 logo_url = match.group(1) if match else ""
             except:
                 logo_url = ""
-
             try:
                 link_element = flight.find_element(By.XPATH, ".//a[contains(@class, 'FlightListingCard')]")
                 goibibo_link = link_element.get_attribute("href")
             except:
                 goibibo_link = url
-
             print("Airline:", airline)
             print("Flight Code(s):", flight_code)
             print("Departure:", f"{departure_time} — {departure_city}")
@@ -116,16 +109,21 @@ def scrape_flights(title_text):
             print("Logo URL:", logo_url)
             print("Goibibo Link:", goibibo_link)
             print("---")
-
             count += 1
             if count >= 3:
                 break
     except Exception as e:
         print(f"Flights not found due to: {e}")
 
+# ========== SCRIPT START ==========
+
 from_city = sys.argv[1]
 to_city = sys.argv[2]
 date = sys.argv[3]
+adults = int(sys.argv[4])
+children = int(sys.argv[5])
+infants = int(sys.argv[6])  
+travelClass = sys.argv[7]
 
 options = uc.ChromeOptions()
 options.add_argument("--headless=new")
@@ -141,17 +139,21 @@ options.add_argument("--disable-extensions")
 options.add_argument("--proxy-bypass-list=*")
 options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
+prefs = {
+    "profile.default_content_setting_values.notifications": 2
+}
+options.add_experimental_option("prefs", prefs)
+
 driver = uc.Chrome(options=options, use_subprocess=True)
 
 url = 'https://www.goibibo.com'
 driver.get(url)
-
 driver.implicitly_wait(5)
-
 ActionChains(driver).move_by_offset(10, 10).click().perform()
 
 closePopups(driver)
 
+# From city
 from_click_area = driver.find_element(By.XPATH, "//div[contains(@class, 'fswFld') and .//span[text()='From']]")
 from_click_area.click()
 from_input = driver.find_element(By.XPATH, "//div[contains(@class, 'fbAAhv')]//input[@type='text']")
@@ -160,6 +162,7 @@ from_input.send_keys(from_city)
 time.sleep(1)
 ActionChains(driver).send_keys(Keys.ENTER).perform()
 
+# To city
 to_input = driver.find_element(By.XPATH, "//div[.//span[text()='To']]/input")
 to_input.click()
 to_input.clear()
@@ -169,6 +172,7 @@ ActionChains(driver).send_keys(Keys.ENTER).perform()
 
 escape(driver)
 
+# Departure date
 departure_field = driver.find_element(By.XPATH, "//div[contains(@class, 'fswFld') and .//span[text()='Departure']]")
 departure_field.click()
 desired_date = driver.find_element(By.XPATH, f"//div[@aria-label='{date}']")
@@ -176,13 +180,37 @@ desired_date.click()
 
 escape(driver)
 
+# ✅ Travellers & Class selection
+info_click = driver.find_element(By.XPATH, "//div[contains(@class, 'fswFld') and .//span[text()='Travellers & Class']]")
+info_click.click()
+time.sleep(1)
+increase_count(driver, "Adults", adults)
+increase_count(driver, "Children", children)
+increase_count(driver, "Infants", infants)
+travel_class = travelClass
+class_xpath = f"//li[text()='{travel_class.lower()}']"
+driver.find_element(By.XPATH, class_xpath).click()
+
+try:
+    done_button = driver.find_element(By.XPATH, "//a[contains(@class, 'sc-12foipm-64') and contains(text(), 'Done')]")
+    if done_button.is_displayed():
+        driver.execute_script("arguments[0].click();", done_button)
+        print("✅ Clicked 'Done' to apply Travellers & Class changes")
+    else:
+        print("❌ 'Done' button not visible")
+except Exception as e:
+    print(f"❌ Failed to click 'Done': {e}")
+
+escape(driver)
+
+# 🔍 Click search
 search_btn = driver.find_element(By.XPATH, "//div[contains(@class, 'cJDpIZ') and .//span[text()='SEARCH FLIGHTS']]")
 search_btn.click()
 
 closePopups(driver)
 
+# ✈ Scrape flights
 scrape_flights("Cheapest")
-
 time.sleep(1)
 
 cluster_tabs = driver.find_elements(By.XPATH, "//div[@data-test='component-clusterTabItem']")
