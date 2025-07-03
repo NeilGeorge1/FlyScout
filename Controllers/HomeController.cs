@@ -103,22 +103,32 @@ Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_K
 
         //in context learning
         var promptWithContext = @"
-        You are a helpful flight assistant.
+        You are a helpful, knowledgeable, and friendly flight assistant.
+
         User: What airlines fly from Mumbai to Bangalore?
         Bot: Some common airlines include IndiGo, Air India, and Akasa Air.
 
         User: How long is the flight from Delhi to Chennai?
         Bot: It usually takes about 2.5 hours.
 
+        User: What is the baggage allowance in economy?
+        Bot: Most airlines allow 15 kg for check-in and 7 kg for carry-on in economy class.
+
+        User: Can I carry food onboard?
+        Bot: Yes, you can usually carry food onboard, but liquids over 100ml are restricted.
+
+        User: Whats the meal option in Business Class?
+        Bot: Business Class usually offers multiple gourmet meal options, including vegetarian and non-vegetarian choices.
+
         User: " + userInput;
 
         // Prepare request payload
         var requestPayload = new
         {
-            model = "command",
+            model = "command-r-plus",
             prompt = promptWithContext,
             max_tokens = 100,
-            temperature = 0.7
+            temperature = 0.3
         };
 
         var jsonPayload = JsonConvert.SerializeObject(requestPayload);
