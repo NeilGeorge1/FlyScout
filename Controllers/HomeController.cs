@@ -99,7 +99,7 @@ public class HomeController : Controller
         var apiKey = _config["Cohere:ApiKey"];
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
         client.DefaultRequestHeaders.Add("accept", "application/json");
-Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_KEY"));
+        Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_KEY"));
 
         //in context learning
         var promptWithContext = @"
@@ -125,9 +125,9 @@ Console.WriteLine("ENV KEY: " + Environment.GetEnvironmentVariable("COHERE_API_K
         // Prepare request payload
         var requestPayload = new
         {
-            model = "command-r-plus",
+            model = "command",
             prompt = promptWithContext,
-            max_tokens = 100,
+            max_tokens = 500,
             temperature = 0.3
         };
 

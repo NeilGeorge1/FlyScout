@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,150 +10,166 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/FlyScout.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #0d6efd !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+        }
+
+        .footer {
+            background-color: #f1f3f5;
+        }
+
+        #chatbot-toggle {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #007bff, #00bfff);
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #chatbot-window {
+            font-size: 0.95rem;
+            background: #fff;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
+    <!-- NAVBAR -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">FlyScout</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg sticky-top">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">✈️ FlyScout</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFly"
+                    aria-controls="navbarFly" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
+                <div class="collapse navbar-collapse justify-content-between" id="navbarFly">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-primary rounded-pill px-3 py-1" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-secondary rounded-pill px-3 py-1" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
-
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link">Hello, @User.Identity.Name</span>
+                            <li class="nav-item me-3">
+                                <span class="nav-link">👤 @User.Identity.Name</span>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item me-3">
                                 <form method="post" asp-area="Identity" asp-page="/Account/Logout" class="form-inline">
-                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
                                 </form>
                             </li>
                         }
                         else
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a></li>
                         }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <!-- MAIN BODY -->
+    <div class="container py-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <!-- FOOTER -->
+    <footer class="footer border-top py-3 text-center text-muted">
         <div class="container">
-            &copy; 2025 - FlyScout - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - FlyScout · <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+
+    <!-- SCRIPTS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    <!-- Chatbot Widget -->
-    <div id="chatbot-toggle" style="
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        background-color: #007bff;
-        color: white;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        font-size: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 9999;
-    ">
-        💬
-    </div>
 
-    <div id="chatbot-window" style="
-        position: fixed;
-        bottom: 100px;
-        right: 25px;
-        width: 350px;
-        max-height: 500px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        overflow: hidden;
-        display: none;
-        flex-direction: column;
-        z-index: 9999;
-    ">
-        <div style="background-color: #007bff; color: white; padding: 10px; font-weight: bold;">
-            FlyScout Chatbot
-            <span style="float: right; cursor: pointer;" onclick="document.getElementById('chatbot-window').style.display='none'">×</span>
+    <!-- Chatbot Widget -->
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div id="chatbot-toggle">💬</div>
+        <div id="chatbot-window" style="display:none; position:fixed; bottom:100px; right:25px; width:350px; max-height:500px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.1); overflow:hidden; flex-direction:column; z-index:9999;">
+            <div style="background:#007bff; color:white; padding:10px; font-weight:bold;">
+                FlyScout Chatbot
+                <span style="float:right; cursor:pointer;" onclick="document.getElementById('chatbot-window').style.display='none'">×</span>
+            </div>
+            <div class="chat-body" style="padding:10px; height:300px; overflow-y:auto;"></div>
+            <form id="chatForm" style="display:flex; border-top:1px solid #ddd;">
+                <input name="UserInput" class="form-control" placeholder="Ask me anything..." required style="border:none; border-radius:0;" />
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
         </div>
-        <div class="chat-body" style="padding: 10px; height: 300px; overflow-y: auto;"></div>
-        <form id="chatForm" style="display: flex; border-top: 1px solid #ddd;">
-            <input name="UserInput" class="form-control" placeholder="Ask me anything..." style="border: none; border-radius: 0;" required />
-            <button type="submit" class="btn btn-primary">Send</button>
-        </form>
-    </div>
+    }
 
     <script>
         document.getElementById("chatbot-toggle").addEventListener("click", () => {
-            const chatWindow = document.getElementById("chatbot-window");
-            chatWindow.style.display = chatWindow.style.display === "none" ? "flex" : "none";
+            const win = document.getElementById("chatbot-window");
+            win.style.display = win.style.display === "none" ? "flex" : "none";
         });
 
         document.getElementById("chatForm").addEventListener("submit", async function (e) {
             e.preventDefault();
             const input = this.querySelector("input[name='UserInput']");
-            const message = input.value;
+            const msg = input.value.trim();
             const body = document.querySelector(".chat-body");
+            if (!msg) return;
 
-            if (!message.trim()) return;
-
-            // Show user's message
-            body.insertAdjacentHTML("beforeend", `<div class="alert alert-secondary mt-2"><strong>You:</strong> ${message}</div>`);
-
-            const response = await fetch("/Home/Chat", {
+            body.insertAdjacentHTML("beforeend", `<div class="alert alert-secondary mt-2"><strong>You:</strong> ${msg}</div>`);
+            const res = await fetch("/Home/Chat", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `userInput=${encodeURIComponent(message)}`
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `userInput=${encodeURIComponent(msg)}`
             });
-
-            const data = await response.json();
-
+            const data = await res.json();
             if (data.reply) {
                 body.insertAdjacentHTML("beforeend", `<div class="alert alert-success mt-2"><strong>Bot:</strong> ${data.reply}</div>`);
-            } else if (data.error) {
+            } else {
                 body.insertAdjacentHTML("beforeend", `<div class="alert alert-danger mt-2"><strong>Error:</strong> ${data.error}</div>`);
             }
-
             input.value = "";
-            body.scrollTop = body.scrollHeight; // Auto scroll
+            body.scrollTop = body.scrollHeight;
         });
     </script>
-
 </body>
 </html>

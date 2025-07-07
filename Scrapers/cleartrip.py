@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
+from datetime import datetime, timedelta
 
 def escape(driver):
     try:
@@ -48,12 +49,10 @@ to_suggestion.click()
 
 ActionChains(driver).move_by_offset(100, 100).click().perform()
 
+departure_field = driver.find_element(By.CSS_SELECTOR, "[data-testid='dateSelectOnward']")
+departure_field.click()
 
-date_str = "Wed, Jun 25"  # or dynamically generated
-xpath = f"//div[contains(@class, 'card-price') and text()='{date_str}']"
-element = driver.find_element(By.XPATH, xpath)
-element.click()
-ActionChains(driver).move_by_offset(100, 100).click().perform()
+driver.find_element(By.XPATH, "//div[contains(@class, 'day-gridContent') and text()='11']").click()
 
 closePopups(driver)
 
